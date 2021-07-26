@@ -46,7 +46,7 @@ abstract class AbstractInitIntegrationSpec extends AbstractIntegrationSpec {
     }
 
     void initializeIntoTestDir() {
-        containerDir = testDirectory.createDir("dir")
+        containerDir = testDirectory
         targetDir = containerDir.createDir("some-thing")
         subprojectDir = subprojectName() ? targetDir.file(subprojectName()) : targetDir
     }

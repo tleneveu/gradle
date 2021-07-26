@@ -75,10 +75,13 @@ public class DefaultSettingsLoader implements SettingsLoader {
         if (customSettingsFile != null) {
             return false;
         }
+
         // Use the loaded settings if it includes the target project (based on build file, project dir or current dir)
         if (spec.containsProject(loadedSettings.getProjectRegistry())) {
             return false;
         }
+
+        // Allow a built-in command to run in a directory not contained in the settings file (but don't use the settings from that file)
         if (!startParameter.getTaskNames().isEmpty()) {
             for (BuiltInCommand command : builtInCommands) {
                 if (command.getTaskName().equals(startParameter.getTaskNames().get(0))) {
@@ -87,6 +90,12 @@ public class DefaultSettingsLoader implements SettingsLoader {
                 }
             }
         }
+
+        // Allow a buildSrc directory to have no settings file
+        if (startParameter.getProjectDir() != null && startParameter.getProjectDir().getName().equals(SettingsInternal.BUILD_SRC)) {
+            return true;
+        }
+
         // Use an empty settings for a target build file located in the same directory as the settings file.
         return startParameter.getProjectDir() != null && loadedSettings.getSettingsDir().equals(startParameter.getProjectDir());
     }
