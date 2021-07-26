@@ -157,6 +157,21 @@ class UndefinedBuildExecutionIntegrationTest extends AbstractIntegrationSpec {
         expect:
         succeeds("help") // without deprecation warning
         result.assertTaskExecuted(":buildSrc:jar")
+
+        executer.withArguments("-p", "buildSrc")
+        succeeds("help")
+    }
+
+    def "treats empty buildSrc as undefined build"() {
+        given:
+        settingsFile.touch()
+        file("buildSrc").createDir()
+
+        expect:
+        succeeds("help")
+
+        executer.withArguments("-p", "buildSrc")
+        fails("help")
     }
 
     @Unroll

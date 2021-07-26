@@ -302,8 +302,10 @@ class AbstractIntegrationSpec extends Specification {
         def undefinedBuildDirectory = Files.createTempDirectory("gradle").toFile()
         testDirOverride = new TestFile(undefinedBuildDirectory)
         assertNoDefinedBuild(testDirectory)
-        executer.inDirectory(testDirectory)
-        executer.ignoreMissingSettingsFile()
+        executer.beforeExecute {
+            executer.inDirectory(testDirectory)
+            executer.ignoreMissingSettingsFile()
+        }
     }
 
     void assertNoDefinedBuild(TestFile testDirectory) {

@@ -357,7 +357,7 @@ class BuildInitPluginIntegrationTest extends AbstractInitIntegrationSpec {
 
         then:
         succeeds "init"
-        outputContains("The settings file '../settings.gradle' already exists. Skipping build initialization.")
+        outputContains("The settings file '..${File.separatorChar}settings.gradle' already exists. Skipping build initialization.")
         targetDir.list().toList() == [".gradle"] // ensure nothing generated
     }
 
