@@ -39,16 +39,16 @@ abstract class AbstractInitIntegrationSpec extends AbstractIntegrationSpec {
         """
         initializeIntoTestDir()
         executer.withRepositoryMirrors()
-        executer.beforeExecute {
-            executer.inDirectory(targetDir)
-            executer.ignoreMissingSettingsFile()
-        }
     }
 
     void initializeIntoTestDir() {
         containerDir = testDirectory
         targetDir = containerDir.createDir("some-thing")
         subprojectDir = subprojectName() ? targetDir.file(subprojectName()) : targetDir
+        executer.beforeExecute {
+            executer.inDirectory(targetDir)
+            executer.ignoreMissingSettingsFile()
+        }
     }
 
     @Override
