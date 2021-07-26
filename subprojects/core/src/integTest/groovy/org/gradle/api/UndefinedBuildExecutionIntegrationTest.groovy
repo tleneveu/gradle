@@ -21,28 +21,9 @@ import org.gradle.integtests.fixtures.AbstractIntegrationSpec
 import org.gradle.test.fixtures.file.TestFile
 import spock.lang.Unroll
 
-import java.nio.file.Files
-
 class UndefinedBuildExecutionIntegrationTest extends AbstractIntegrationSpec {
-    def undefinedBuildDirectory = Files.createTempDirectory("gradle").toFile()
-
     def setup() {
-        assertNoDefinedBuild(testDirectory)
-        executer.inDirectory(testDirectory)
-        executer.ignoreMissingSettingsFile()
-    }
-
-    private static void assertNoDefinedBuild(TestFile testDirectory) {
-        testDirectory.file(".gradle").assertDoesNotExist()
-        def currentDirectory = testDirectory
-        for (; ;) {
-            currentDirectory.file(settingsFileName).assertDoesNotExist()
-            currentDirectory.file(settingsKotlinFileName).assertDoesNotExist()
-            currentDirectory = currentDirectory.parentFile
-            if (currentDirectory == null) {
-                break
-            }
-        }
+        useTestDirectoryThatIsNotEmbeddedInAnotherBuild()
     }
 
     @Unroll
@@ -194,10 +175,5 @@ class UndefinedBuildExecutionIntegrationTest extends AbstractIntegrationSpec {
     void isEmpty(TestFile dir) {
         dir.assertIsDir()
         assert dir.listFiles().size() == 0
-    }
-
-    @Override
-    TestFile getTestDirectory() {
-        return new TestFile(undefinedBuildDirectory)
     }
 }

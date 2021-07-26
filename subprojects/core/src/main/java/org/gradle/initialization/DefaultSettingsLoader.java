@@ -23,12 +23,14 @@ import org.gradle.api.internal.GradleInternal;
 import org.gradle.api.internal.SettingsInternal;
 import org.gradle.api.internal.StartParameterInternal;
 import org.gradle.api.internal.initialization.ClassLoaderScope;
+import org.gradle.configuration.project.BuiltInCommand;
 import org.gradle.initialization.layout.BuildLayout;
 import org.gradle.initialization.layout.BuildLayoutConfiguration;
 import org.gradle.initialization.layout.BuildLayoutFactory;
 import org.gradle.util.Path;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Handles locating and processing setting.gradle files.  Also deals with the buildSrc module, since that modules is
@@ -38,13 +40,16 @@ public class DefaultSettingsLoader implements SettingsLoader {
     public static final String BUILD_SRC_PROJECT_PATH = ":" + SettingsInternal.BUILD_SRC;
     private final SettingsProcessor settingsProcessor;
     private final BuildLayoutFactory buildLayoutFactory;
+    private final List<BuiltInCommand> builtInCommands;
 
     public DefaultSettingsLoader(
         SettingsProcessor settingsProcessor,
-        BuildLayoutFactory buildLayoutFactory
+        BuildLayoutFactory buildLayoutFactory,
+        List<BuiltInCommand> builtInCommands
     ) {
         this.settingsProcessor = settingsProcessor;
         this.buildLayoutFactory = buildLayoutFactory;
+        this.builtInCommands = builtInCommands;
     }
 
     @Override
@@ -73,6 +78,14 @@ public class DefaultSettingsLoader implements SettingsLoader {
         // Use the loaded settings if it includes the target project (based on build file, project dir or current dir)
         if (spec.containsProject(loadedSettings.getProjectRegistry())) {
             return false;
+        }
+        if (!startParameter.getTaskNames().isEmpty()) {
+            for (BuiltInCommand command : builtInCommands) {
+                if (command.getTaskName().equals(startParameter.getTaskNames().get(0))) {
+                    // Allow built-in command to run in a directory not contained in the settings file (but don't use the settings from that file)
+                    return true;
+                }
+            }
         }
         // Use an empty settings for a target build file located in the same directory as the settings file.
         return startParameter.getProjectDir() != null && loadedSettings.getSettingsDir().equals(startParameter.getProjectDir());

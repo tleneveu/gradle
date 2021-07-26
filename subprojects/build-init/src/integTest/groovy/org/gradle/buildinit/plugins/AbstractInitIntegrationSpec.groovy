@@ -27,17 +27,35 @@ import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.not
 
 abstract class AbstractInitIntegrationSpec extends AbstractIntegrationSpec {
-    final def targetDir = testDirectory.createDir("some-thing")
-    final def subprojectDir = subprojectName() ? targetDir.file(subprojectName()) : targetDir
+    TestFile containerDir
+    TestFile targetDir
+    TestFile subprojectDir
 
     abstract String subprojectName()
 
     def setup() {
+        file("settings.gradle") << """
+            // This is here to prevent Gradle searching up to find the build's settings.gradle
+        """
+        initializeIntoTestDir()
         executer.withRepositoryMirrors()
         executer.beforeExecute {
             executer.inDirectory(targetDir)
             executer.ignoreMissingSettingsFile()
         }
+    }
+
+    void initializeIntoTestDir() {
+        containerDir = testDirectory.createDir("dir")
+        targetDir = containerDir.createDir("some-thing")
+        subprojectDir = subprojectName() ? targetDir.file(subprojectName()) : targetDir
+    }
+
+    @Override
+    void useTestDirectoryThatIsNotEmbeddedInAnotherBuild() {
+        super.useTestDirectoryThatIsNotEmbeddedInAnotherBuild()
+        initializeIntoTestDir()
+        assertNoDefinedBuild(targetDir)
     }
 
     void assertTestPassed(String className, String name) {
